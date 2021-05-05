@@ -1,0 +1,7 @@
+install.packages("shiny")
+install.packages("dplyr")
+install.packages("readr")
+install.packages("leaflet")
+install.packages("shinythemes")
+install.packages("plotly")
+install.packages("lubridate")
