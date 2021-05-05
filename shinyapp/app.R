@@ -120,8 +120,10 @@ server = function(input, output) {
 
 # Run the application
 
-shinyApp(ui = ui, server = server,
-         options=list(
-             host = "0.0.0.0"
-         )
-         )
+shinyApp(
+    options = list(
+        host = "0.0.0.0",
+        port = 3838
+    ),
+    ui = ui, server = server
+)
