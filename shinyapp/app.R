@@ -6,10 +6,15 @@ library(shinythemes)
 library(plotly)
 library(lubridate)
 
-historical_tak = read_csv("historical_tak_filtered.csv") %>%
+historical_tak = read_csv("/srv/shiny-server/tak/historical_tak_filtered.csv") %>%
     mutate(start=as_datetime(start/1000),
            time = as_datetime(time/1000)) %>%
     mutate(start=as.Date(start))
+
+# historical_tak = read_csv("/srv/shiny-server/tak/historical_tak_filtered.csv") %>%
+#     mutate(start=as_datetime(start/1000),
+#            time = as_datetime(time/1000)) %>%
+#     mutate(start=as.Date(start))
 
 # Define UI for application that draws a histogram
 ui = fluidPage(theme = shinytheme("darkly"),
@@ -19,17 +24,24 @@ ui = fluidPage(theme = shinytheme("darkly"),
                 
                     # Show a plot of the generated distribution
                     fluidRow(
-                        sliderInput(
-                            "date",
-                            "Filter Date Range",
-                            min=ymd("2021-04-28"),
-                            max=as.Date(max(historical_tak$start)),
-                            value=as.Date(min(historical_tak$start))
-                        ),
                         column(6,
+                               sliderInput(
+                                   "date",
+                                   "Filter Date Range",
+                                   min=ymd("2021-04-28"),
+                                   max=as.Date(max(historical_tak$start)),
+                                   value=as.Date(min(historical_tak$start))
+                               ),
                                plotlyOutput("density"),
                                plotlyOutput("ts")),
                         column(6,
+                               pickerInput(
+                                   "type",
+                                   "Filter Type",
+                                   choices=unique(historical_tak$typeDescription),
+                                   selected=unique(historical_tak$typeDescription),
+                                   multiple=T
+                               ),
                                leafletOutput("current_map",
                                              height = 1000))
                     ))
