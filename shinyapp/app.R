@@ -1,5 +1,3 @@
-#install.packages(c("shiny","tidyverse","leaflet","shinythemes","plotly","lubridate"))
-
 library(shiny)
 library(dplyr)
 library(readr)
@@ -8,8 +6,9 @@ library(shinythemes)
 library(plotly)
 library(lubridate)
 
-historical_tak = read_csv("/srv/shiny-server/tak/historical_tak_filtered.csv") %>%
-    mutate(start=as_datetime(start/1000)) %>%
+historical_tak = read_csv("historical_tak_filtered.csv") %>%
+    mutate(start=as_datetime(start/1000),
+           time = as_datetime(time/1000)) %>%
     mutate(start=as.Date(start))
 
 # Define UI for application that draws a histogram
@@ -28,7 +27,8 @@ ui = fluidPage(theme = shinytheme("darkly"),
                             value=as.Date(min(historical_tak$start))
                         ),
                         column(6,
-                               plotlyOutput("density")),
+                               plotlyOutput("density"),
+                               plotlyOutput("ts")),
                         column(6,
                                leafletOutput("current_map",
                                              height = 1000))
@@ -69,18 +69,47 @@ server = function(input, output) {
             plot_ly() %>%
             add_trace(type = "histogram2dcontour",
                       x =  ~ x,
-                      y =  ~ y)
+                      y =  ~ y) %>%
+            layout(plot_bgcolor='#222222') %>% 
+            layout(paper_bgcolor='#222222',
+                   font=list(
+                       color="white"
+                   ))
         
         
+    })
+    
+    output$ts = renderPlotly({
+        
+        historical_tak %>%
+            filter(
+                start==input$date[1]
+            ) %>%
+            mutate(start=round_date(time,"hour")) %>%
+            count(start,typeDescription) %>%
+            filter(typeDescription %in% c(
+                "unknown air air track",
+                "unknown surface sea sea surface track"
+            )) %>%
+            plot_ly(
+                x=~start,
+                y=~n,
+                type="bar",
+                color=~typeDescription
+            ) %>%
+            layout(plot_bgcolor='#222222') %>% 
+            layout(paper_bgcolor='#222222',
+                   font=list(
+                       color="white"
+                   ))
     })
     
 }
 
 # Run the application
-shinyApp(
-        options = list(
-            host = "0.0.0.0",
-            port = 3838
-        ),
-        ui = ui, server = server
-    )
+
+shinyApp(ui = ui, server = server,
+         options=list(
+             host = "0.0.0.0"
+         )
+         )
