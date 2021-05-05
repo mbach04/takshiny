@@ -6,7 +6,7 @@ library(shinythemes)
 library(plotly)
 library(lubridate)
 
-# historical_tak = read_csv("/srv/shiny-server/tak/historical_tak_filtered.csv") %>%
+historical_tak = read_csv("/srv/shiny-server/tak/historical_tak_filtered.csv") %>%
     mutate(start=as_datetime(start/1000),
            time = as_datetime(time/1000)) %>%
     mutate(start=as.Date(start))
